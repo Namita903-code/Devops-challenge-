@@ -1,0 +1,49 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Install Python deps
+      run: |
+        pip install flake8
+
+    - name: Lint Python
+      run: |
+        flake8 app || true
+
+    - name: Install Helm
+      run: |
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+    - name: Lint Helm chart
+      run: |
+        helm lint helm || true
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Terraform validate
+      run: |
+        cd terraform
+        terraform init -input=false
+        terraform validate || true
+
+    - name: Build Docker image
+      run: |
+        docker build -t devops-challenge:latest .
