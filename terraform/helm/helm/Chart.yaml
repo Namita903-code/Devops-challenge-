@@ -1,0 +1,9 @@
+replicaCount: 1
+
+image:
+  repository: devops-challenge
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 80
